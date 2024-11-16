@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semangka Click</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(145deg, #1f8f3f, #0a5d22);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+        .header {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            font-size: 4.5em;
+            font-weight: 900;
+            background: linear-gradient(to right, #f44336, #4caf50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+        }
+        .balance-container, .page-content {
+            text-align: center;
+            display: none;
+            margin-top: 20px;
+        }
+        .balance {
+            font-size: 2.5em;
+        }
+        .currency-icon {
+            font-size: 14em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 3s ease-in-out;
+        }
+        .currency-icon.spin {
+            animation: spin 3s linear;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .energy-bar {
+            margin: 0 auto;
+            width: 50%;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .energy-level {
+            background-color: green;
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease-in-out;
+        }
+        .menu {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            background: #000;
+            padding: 10px;
+            position: absolute;
+            bottom: 0;
+        }
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #bbb;
+            cursor: pointer;
+        }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+</head>
+<body>
+    <div class="header">Semangka Click</div>
+
+    <!-- Halaman Home -->
+    <div class="balance-container" id="home">
+        <div class="status-bar">Selamat datang di Semangka Click</div>
+        <p>Game pengumpulan koin berbasis blockchain, "Semangka". Mulai mengumpulkan koin sekarang!</p>
+    </div>
+
+    <!-- Halaman Game -->
+    <div class="page-content" id="gamePage">
+        <h2>Game Menu</h2>
+        <p>Klik ikon semangka untuk mulai mengumpulkan koin.</p>
+        <div>Saldo Anda:</div>
+        <div class="balance" id="balance">406,520</div>
+        <div class="energy-bar">
+            <div class="energy-level" id="energy-level" style="width: 100%;"></div>
+        </div>
+        <div id="energy-text">100000/100000</div>
+        <div class="currency-icon" id="currency-icon" onclick="earnCoins()">🍉</div>
+    </div>
+
+    <!-- Halaman Referral -->
+    <div class="page-content" id="matesPage">
+        <h2>Referral Menu</h2>
+        <p>Bagikan kode referral ini untuk mengundang teman:</p>
+        <p><a href="https://example.com">https://example.com</a></p>
+    </div>
+
+    <!-- Halaman Tasks -->
+    <div class="page-content" id="tasksPage">
+        <h2>Tasks Menu</h2>
+        <button onclick="showTasks()">Mulai Jawaban</button>
+    </div>
+
+    <!-- Halaman Boost -->
+    <div class="page-content" id="boostPage">
+        <h2>Boost Menu</h2>
+        <button onclick="showBoostOptions()">Pilih Level Boost</button>
+    </div>
+
+    <div class="menu">
+        <div class="menu-item" onclick="showPage('home')">
+            <span>🏠</span>
+            <div>Home</div>
+        </div>
+        <div class="menu-item" onclick="showPage('gamePage')">
+            <span>🎮</span>
+            <div>Game</div>
+        </div>
+        <div class="menu-item" onclick="showPage('matesPage')">
+            <span>👤</span>
+            <div>Referral</div>
+        </div>
+        <div class="menu-item" onclick="showPage('tasksPage')">
+            <span>📋</span>
+            <div>Tasks</div>
+        </div>
+        <div class="menu-item" onclick="showPage('boostPage')">
+            <span>🚀</span>
+            <div>Boost</div>
+        </div>
+    </div>
+
+    <script>
+        // Inisialisasi Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL:"https://airdropnitrous-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "{"jsonrpc":"2.0","id":1,"result":"0x3d095a7"}
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database(app);
+
+        // Menggunakan Web3 dan Infura
+        const infuraURL = https://polygon-mainnet.infura.io/v3/4b83836820944bf0bba486179ee4dbfd;
+        const web3 = new Web3(new Web3.providers.HttpProvider(infuraURL));
+
+        const contractABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"DailyBonusClaimed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"ReferralReward","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"uid","type":"uint256"},{"indexed":false,"internalType":"string","name":"username","type":"string"}],"name":"Registration","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"RewardClaimed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"duration","type":"uint256"}],"name":"Staked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"Unstaked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawal","type":"event"},{"inputs":[{"internalType":"address","name":"owner_","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"claimDailyBonus","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"claimReward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"clickLimitPer3Hours","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"dailyBonus","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"dailyClickLimit","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"logoCID","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"referralLimit","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"referralReward","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"referrals","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"refillRewardPool","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_username","type":"string"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"rewardPerClick","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"stakes","outputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"startTime","type":"uint256"},{"internalType":"uint256","name":"duration","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"stakingAPY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"stakingBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"userCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"userIdToAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"users","outputs":[{"internalType":"uint256","name":"uid","type":"uint256"},{"internalType":"string","name":"username","type":"string"},{"internalType":"address","name":"wallet","type":"address"},{"internalType":"uint256","name":"level","type":"uint256"},{"internalType":"uint256","name":"clickLimitLevel","type":"uint256"},{"internalType":"uint256","name":"rewardClaimed","type":"uint256"},{"internalType":"uint256","name":"referralCount","type":"uint256"},{"internalType":"uint256","name":"totalReward","type":"uint256"},{"internalType":"bool","name":"registered","type":"bool"},{"internalType":"uint256","name":"lastClaimTime","type":"uint256"},{"internalType":"uint256","name":"dailyBonusCount","type":"uint256"},{"internalType":"uint256","name":"totalClicks","type":"uint256"}],"stateMutability":"view","type":"function"}] // ABI Anda di sini
+        const contractAddress = "0xb88b07C80B9e4e2b3c481623edE7978484aC8594";
+
+        let balance = localStorage.getItem('balance') ? parseInt(localStorage.getItem('balance')) : 406520;
+        let energy = localStorage.getItem('energy') ? parseInt(localStorage.getItem('energy')) : 100000;
+        const maxEnergy = 100000;
+        const energyDecrease = 100;
+        const coinAmount = 100;
+
+        document.getElementById("balance").innerText = balance.toLocaleString();
+        document.getElementById("energy-text").innerText = `${energy}/${maxEnergy}`;
+        document.getElementById("home").style.display = "block"; // Tampilan awal
+
+        function updateLocalStorage() {
+            localStorage.setItem('balance', balance);
+            localStorage.setItem('energy', energy);
+        }
+
+        function earnCoins() {
+            const currencyIcon = document.getElementById("currency-icon");
+            if (!currencyIcon.classList.contains("spin")) {
+                currencyIcon.classList.add("spin");
+                setTimeout(() => currencyIcon.classList.remove("spin"), 3000); // 3 detik
+            }
+            if (energy > 0) {
+                balance += coinAmount;
+                document.getElementById("balance").innerText = balance.toLocaleString();
+                energy -= energyDecrease;
+                if (energy < 0) energy = 0;
+                document.getElementById("energy-text").innerText = `${energy}/${maxEnergy}`;
+                document.getElementById("energy-level").style.width = `${(energy / maxEnergy) * 100}%`;
+                updateLocalStorage();
+            } else {
+                alert("Energi habis! Tunggu untuk isi ulang.");
+            }
+        }
+
+        // Fungsi navigasi halaman
+        function showPage(pageId) {
+            document.querySelectorAll('.balance-container, .page-content').forEach(page => page.style.display = 'none');
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        function showTasks() {
+            const questions = [
+                { question: "Apa nama tokennya?", answer: "Semangka" },
+                { question: "Simbol token?", answer: "Semangka" },
+                { question: "Berapa total suplai token?", answer: "100000000000" }
+            ];
+            for (let q of questions) {
+                const userAnswer = prompt(q.question);
+                if (userAnswer === q.answer) {
+                    balance += 100000;
+                    document.getElementById("balance").innerText = balance.toLocaleString();
+                    updateLocalStorage();
+                    alert("Jawaban benar! Anda mendapat 100.000 koin!");
+                } else {
+                    alert("Jawaban salah. Coba lagi.");
+                }
+            }
+        }
+
+        function showBoostOptions() {
+            const boostLevel = prompt("Pilih level boost (1-5):");
+            if (boostLevel >= 1 && boostLevel <= 5) {
+                const boostAmount = boostLevel * 100000;
+                balance += boostAmount;
+                document.getElementById("balance").innerText = balance.toLocaleString();
+                updateLocalStorage();
+                alert(`Boost level ${boostLevel} diterapkan. Anda mendapat ${boostAmount.toLocaleString()} koin!`);
+            } else {
+                alert("Level boost tidak valid.");
+            }
+        }
+
+        // Menghubungkan ke kontrak dan melakukan transaksi dengan Web3
+        async function sendTransaction() {
+            const accounts = await web3.eth.getAccounts();
+            const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+            // Contoh transaksi, misalnya mengirim koin
+            contract.methods.transfer("0xRecipientAddress", web3.utils.toWei("1", "ether")).send({ from: accounts[0] })
+                .on('transactionHash', (hash) => {
+                    console.log("Transaction Hash: ", hash);
+                })
+                .on('receipt', (receipt) => {
+                    console.log("Transaction Receipt: ", receipt);
+                })
+                .on('error', (error) => {
+                    console.error("Error: ", error);
+                });
+        }
+
+        // Fungsi untuk menyimpan data pengguna ke Firebase
+        function saveUserData() {
+            const userRef = database.ref('users/' + firebase.auth().currentUser.uid);
+            userRef.set({
+                balance: balance,
+                energy: energy
+            }).then(() => {
+                alert("Data berhasil disimpan ke Firebase!");
+            }).catch((error) => {
+                console.error("Error saving data: ", error);
+            });
+        }
+    </script>
+</body>
+  </html>
