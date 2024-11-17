@@ -108,16 +108,28 @@
         <p><a href="https://example.com">https://example.com</a></p>
     </div>
 
-    <!-- Halaman Tasks -->
-    <div class="page-content" id="tasksPage">
-        <h2>Tasks Menu</h2>
-        <button onclick="showTasks()">Mulai Jawaban</button>
+    <!-- Halaman Register -->
+    <div class="page-content" id="registerPage">
+        <h2>Register</h2>
+        <p>Masukkan informasi Anda untuk mendaftar:</p>
+        <input type="text" id="userName" placeholder="Nama Pengguna">
+        <input type="password" id="password" placeholder="Kata Sandi">
+        <button onclick="registerUser()">Daftar</button>
     </div>
 
-    <!-- Halaman Boost -->
-    <div class="page-content" id="boostPage">
-        <h2>Boost Menu</h2>
-        <button onclick="showBoostOptions()">Pilih Level Boost</button>
+    <!-- Halaman Staking -->
+    <div class="page-content" id="stakingPage">
+        <h2>Staking</h2>
+        <p>Stake token untuk mendapatkan imbalan tambahan.</p>
+        <input type="number" id="stakeAmount" placeholder="Jumlah Token">
+        <button onclick="stakeTokens()">Stake</button>
+    </div>
+
+    <!-- Halaman Upgrade Level -->
+    <div class="page-content" id="upgradePage">
+        <h2>Upgrade Level</h2>
+        <p>Tingkatkan level Anda dengan koin yang terkumpul.</p>
+        <button onclick="upgradeLevel()">Upgrade Level</button>
     </div>
 
     <div class="menu">
@@ -133,140 +145,142 @@
             <span>👤</span>
             <div>Referral</div>
         </div>
-        <div class="menu-item" onclick="showPage('tasksPage')">
-            <span>📋</span>
-            <div>Tasks</div>
+        <div class="menu-item" onclick="showPage('registerPage')">
+            <span>📝</span>
+            <div>Register</div>
         </div>
-        <div class="menu-item" onclick="showPage('boostPage')">
+        <div class="menu-item" onclick="showPage('stakingPage')">
+            <span>💰</span>
+            <div>Staking</div>
+        </div>
+        <div class="menu-item" onclick="showPage('upgradePage')">
             <span>🚀</span>
-            <div>Boost</div>
+            <div>Upgrade Level</div>
         </div>
     </div>
 
     <script>
-        // Variabel dan fungsi utama
-        let balance = localStorage.getItem('balance') ? parseInt(localStorage.getItem('balance')) : 406520;
-        let energy = localStorage.getItem('energy') ? parseInt(localStorage.getItem('energy')) : 100000;
-        const maxEnergy = 100000;
-        const energyDecrease = 100;
-        const coinAmount = 100;
+        // ABI dari smart contract
+        const abi = [
+            // ABI lengkap smart contract
+            {
+                "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+                "name": "balanceOf",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+                "name": "getEnergy",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "increaseBalance",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "decreaseEnergy",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "string", "name": "userName", "type": "string"}, {"internalType": "string", "name": "password", "type": "string"}],
+                "name": "registerUser",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
+                "name": "stakeTokens",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "upgradeLevel",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
 
-        document.getElementById("balance").innerText = balance.toLocaleString();
-        document.getElementById("energy-text").innerText = `${energy}/${maxEnergy}`;
-        document.getElementById("home").style.display = "block"; // Tampilan awal
+        const contractAddress = '0x6F167EB8A90B84346A17f707c7850F318Cc44aC6';
+        let web3 = new Web3(new Web3.providers.HttpProvider('https://polygon-mainnet.infura.io/v3/4b83836820944bf0bba486179ee4dbfd'));
+        let contract = new web3.eth.Contract(abi, contractAddress);
+        let userAccount = '0xYourWalletAddress'; // Ganti dengan alamat wallet pengguna
 
-        function updateLocalStorage() {
-            localStorage.setItem('balance', balance);
-            localStorage.setItem('energy', energy);
+        // Fungsi untuk register user
+        function registerUser() {
+            let userName = document.getElementById("userName").value;
+            let password = document.getElementById("password").value;
+            if (userName && password) {
+                alert("Pendaftaran berhasil!");
+                // Logika smart contract untuk register user
+                contract.methods.registerUser(userName, password).send({ from: userAccount });
+            } else {
+                alert("Isi nama pengguna dan kata sandi!");
+            }
         }
 
-        function earnCoins() {
-            const currencyIcon = document.getElementById("currency-icon");
-            if (!currencyIcon.classList.contains("spin")) {
-                currencyIcon.classList.add("spin");
-                setTimeout(() => currencyIcon.classList.remove("spin"), 3000); // 3 detik
+        // Fungsi untuk staking
+        function stakeTokens() {
+            let stakeAmount = document.getElementById("stakeAmount").value;
+            if (stakeAmount > 0) {
+                alert("Staking berhasil!");
+                // Logika smart contract untuk staking
+                contract.methods.stakeTokens(stakeAmount).send({ from: userAccount });
+            } else {
+                alert("Jumlah staking tidak valid!");
             }
+        }
+
+        // Fungsi untuk upgrade level
+        function upgradeLevel() {
+            alert("Level berhasil ditingkatkan!");
+            // Logika smart contract untuk upgrade level
+            contract.methods.upgradeLevel().send({ from: userAccount });
+        }
+
+        // Fungsi untuk mendapatkan saldo dan memperbarui halaman
+        async function updateBalance() {
+            let balance = await contract.methods.balanceOf(userAccount).call();
+            document.getElementById("balance").innerText = balance;
+        }
+
+        // Fungsi untuk mendapatkan energi dan mengurangi saldo
+        async function earnCoins() {
+            let energy = await contract.methods.getEnergy(userAccount).call();
             if (energy > 0) {
-                balance += coinAmount;
-                document.getElementById("balance").innerText = balance.toLocaleString();
-                energy -= energyDecrease;
-                if (energy < 0) energy = 0;
-                document.getElementById("energy-text").innerText = `${energy}/${maxEnergy}`;
-                document.getElementById("energy-level").style.width = `${(energy / maxEnergy) * 100}%`;
-                updateLocalStorage();
+                alert("Anda mendapatkan koin!");
+                // Menambah saldo dan mengurangi energi
+                contract.methods.increaseBalance().send({ from: userAccount });
+                contract.methods.decreaseEnergy().send({ from: userAccount });
+                updateBalance();  // Memperbarui saldo setelah klik
             } else {
-                alert("Energi habis! Tunggu untuk isi ulang.");
+                alert("Energi Anda habis!");
             }
         }
 
-        // Fungsi navigasi halaman
+        // Menampilkan halaman yang dipilih
         function showPage(pageId) {
-            document.querySelectorAll('.balance-container, .page-content').forEach(page => page.style.display = 'none');
-            document.getElementById(pageId).style.display = 'block';
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.style.display = "none";
+            });
+            document.getElementById(pageId).style.display = "block";
         }
 
-        function showTasks() {
-            const questions = [
-                { question: "Apa nama tokennya?", answer: "Semangka" },
-                { question: "Simbol token?", answer: "Semangka" },
-                { question: "Berapa total suplai token?", answer: "100000000000" }
-            ];
-            for (let q of questions) {
-                const userAnswer = prompt(q.question);
-                if (userAnswer === q.answer) {
-                    balance += 100000;
-                    document.getElementById("balance").innerText = balance.toLocaleString();
-                    updateLocalStorage();
-                    alert("Jawaban benar! Anda mendapat 100,000 koin.");
-                } else {
-                    alert("Jawaban salah.");
-                }
-            }
-        }
-
-        function showBoostOptions() {
-            const level = parseInt(prompt("Pilih level boost:\n1. 10,000 koin\n2. 50,000 koin\n3. 100,000 koin\nMasukkan nomor pilihan Anda:"));
-            let boostAmount = 0;
-
-            if (level === 1) {
-                boostAmount = 10000;
-            } else if (level === 2) {
-                boostAmount = 50000;
-            } else if (level === 3) {
-                boostAmount = 100000;
-            } else {
-                alert("Pilihan tidak valid.");
-                return;
-            }
-
-            if (balance >= boostAmount) {
-                balance -= boostAmount;
-                energy = maxEnergy;
-                document.getElementById("balance").innerText = balance.toLocaleString();
-                document.getElementById("energy-text").innerText = `${energy}/${maxEnergy}`;
-                document.getElementById("energy-level").style.width = "100%";
-                updateLocalStorage();
-                alert(`Boost berhasil! Anda telah menggunakan ${boostAmount} koin.`);
-            } else {alert("Koin tidak cukup untuk boost yang dipilih.");
-            }
-        }
-
-        // Fungsi untuk mengisi ulang energi
-        function rechargeEnergy() {
-            if (balance >= 5000) {
-                balance -= 5000;
-                energy = maxEnergy;
-                document.getElementById("balance").innerText = balance.toLocaleString();
-                document.getElementById("energy-text").innerText = `${energy}/${maxEnergy}`;
-                document.getElementById("energy-level").style.width = "100%";
-                updateLocalStorage();
-                alert("Energi telah terisi penuh!");
-            } else {
-                alert("Koin tidak cukup untuk mengisi ulang energi.");
-            }
-        }
-
-        // Menampilkan halaman berdasarkan menu
-        function showPage(pageId) {
-            document.querySelectorAll('.balance-container, .page-content').forEach(page => page.style.display = 'none');
-            document.getElementById(pageId).style.display = 'block';
-        }
-
-        // Fungsi untuk halaman referral
-        function showReferralPage() {
-            const referralLink = "https://example.com?ref=" + localStorage.getItem("userID");
-            alert("Bagikan link referral Anda: " + referralLink);
-        }
-
-        // Fungsi untuk menginisiasi ID pengguna unik
-        if (!localStorage.getItem("userID")) {
-            localStorage.setItem("userID", Math.random().toString(36).substring(7)); // ID acak untuk setiap pengguna baru
-        }
-
-        // Fungsi pengaturan halaman referral
-        function showReferral() {
-            alert("Link referral: " + "https://example.com?ref=" + localStorage.getItem("userID"));
-        }
+        // Menampilkan halaman utama saat pertama kali
+        document.getElementById("home").style.display = "block";
     </script>
 </body>
 </html>
