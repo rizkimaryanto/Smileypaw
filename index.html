@@ -77,6 +77,21 @@
             color: #bbb;
             cursor: pointer;
         }
+        @media (max-width: 768px) {
+            .header {
+                font-size: 3em;
+            }
+            .currency-icon {
+                font-size: 10em;
+            }
+            .menu {
+                flex-direction: column;
+                align-items: center;
+            }
+            .menu-item {
+                margin-bottom: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -131,8 +146,6 @@
         <h2>Upgrade Level</h2>
         <p>Tingkatkan level Anda dengan koin yang terkumpul.</p>
         <button onclick="upgradeLevel()">Upgrade Level</button>
-    </div>
-
     <div class="menu">
         <div class="menu-item" onclick="showPage('home')">
             <span>🏠</span>
@@ -160,179 +173,154 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.1/dist/web3.min.js"></script>
     <script>
-        // ABI dari smart contract
-        const abi = [
-            // ABI lengkap smart contract
-            {
-                "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-                "name": "balanceOf",
-                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-                "name": "getEnergy",
-                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [],
-                "name": "increaseBalance",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [],
-                "name": "decreaseEnergy",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [{"internalType": "string", "name": "userName", "type": "string"}, {"internalType": "string", "name": "password", "type": "string"}, {"internalType": "string", "name": "walletAddress", "type": "string"}],
-                "name": "registerUser",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
-                "name": "stakeTokens",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [],
-                "name": "upgradeLevel",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            }
-        ];
-
-        const contractAddress = '0x6F167EB8A90B84346A17f707c7850F318Cc44aC6';
-        let web3 = new Web3(new Web3.providers.HttpProvider('https://polygon-mainnet.infura.io/v3/4b83836820944bf0bba486179ee4dbfd'));
-        let contract = new web3.eth.Contract(abi, contractAddress);
+        let isLoggedIn = false;
         let userAccount = '0xYourWalletAddress'; // Ganti dengan alamat wallet pengguna
 
-        // Fungsi untuk register user
+        // Fungsi untuk menampilkan loading
+        function showLoading(message) {
+            let loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading';
+            loadingDiv.innerHTML = `<div style="position:fixed;top:50%;left:50%;transform:translate(-50%, -50%);background:white;color:black;padding:10px;border-radius:5px;z-index:9999;">${message}</div>`;
+            document.body.appendChild(loadingDiv);
+        }
+
+        function hideLoading() {
+            let loadingDiv = document.getElementById('loading');
+            if (loadingDiv) loadingDiv.remove();
+        }
+
+        // Fungsi untuk validasi alamat wallet
+        function isValidWalletAddress(address) {
+            return /^0x[a-fA-F0-9]{40}$/.test(address);
+        }
+
+        // Fungsi Register
         function registerUser() {
             let userName = document.getElementById("userName").value;
             let password = document.getElementById("password").value;
             let walletAddress = document.getElementById("walletAddress").value;
+            if (!isValidWalletAddress(walletAddress)) {
+                alert('Alamat wallet tidak valid.');
+                return;
+            }
             if (userName && password && walletAddress) {
+                showLoading('Mendaftarkan pengguna...');
+                // Register user dengan smart contract
                 contract.methods.registerUser(userName, password, walletAddress)
                     .send({ from: userAccount })
                     .then(() => {
                         alert('Pendaftaran berhasil!');
+                        hideLoading();
                     })
                     .catch((error) => {
-                        console.error('Error saat mendaftar:', error);
-                        alert('Terjadi kesalahan saat pendaftaran.');
+                        alert('Terjadi kesalahan.');
+                        hideLoading();
                     });
             } else {
                 alert('Harap lengkapi semua kolom!');
             }
         }
 
-        // Fungsi untuk melakukan staking
+        // Fungsi untuk staking tokens
         function stakeTokens() {
             let stakeAmount = document.getElementById("stakeAmount").value;
             if (stakeAmount && !isNaN(stakeAmount) && stakeAmount > 0) {
+                showLoading('Proses staking...');
                 contract.methods.stakeTokens(stakeAmount)
                     .send({ from: userAccount })
                     .then(() => {
                         alert('Staking berhasil!');
+                        hideLoading();
                     })
                     .catch((error) => {
-                        console.error('Error saat staking:', error);
                         alert('Terjadi kesalahan saat staking.');
+
+hideLoading();
                     });
             } else {
-                alert('Harap masukkan jumlah token yang valid.');
+                alert('Harap masukkan jumlah staking yang valid.');
             }
         }
 
         // Fungsi untuk upgrade level
         function upgradeLevel() {
+            showLoading('Meningkatkan level...');
             contract.methods.upgradeLevel()
                 .send({ from: userAccount })
                 .then(() => {
                     alert('Level berhasil ditingkatkan!');
+                    hideLoading();
                 })
                 .catch((error) => {
-                    console.error('Error saat upgrade level:', error);
                     alert('Terjadi kesalahan saat upgrade level.');
+                    hideLoading();
                 });
         }
 
-        // Fungsi untuk mengupdate saldo dan energi
-        function updateBalanceAndEnergy() {
+        // Fungsi untuk mengambil saldo pengguna
+        function getBalance() {
             contract.methods.balanceOf(userAccount).call()
                 .then((balance) => {
                     document.getElementById("balance").innerText = balance;
-                })
-                .catch((error) => {
-                    console.error('Error saat mengambil saldo:', error);
-                });
-
-            contract.methods.getEnergy(userAccount).call()
-                .then((energy) => {
-                    let energyPercentage = (energy / 100000) * 100;
-                    document.getElementById("energy-level").style.width = energyPercentage + '%';
-                    document.getElementById("energy-text").innerText = energy + '/100000';
-                })
-                .catch((error) => {
-                    console.error('Error saat mengambil energi:', error);
                 });
         }
 
-        // Fungsi untuk melakukan klik pada ikon semangka (earn coins)
+        // Fungsi untuk energi
+        function updateEnergy() {
+            let energyBar = document.getElementById("energy-level");
+            let energyText = document.getElementById("energy-text");
+            let energy = 100000;  // Asumsi nilai maksimum energi
+            energyBar.style.width = `${energy / 1000}%`;
+            energyText.innerText = `${energy}/100000`;
+        }
+
+        // Fungsi untuk memulai pengumpulan koin
         function earnCoins() {
-            // Cek apakah energi cukup
-            contract.methods.getEnergy(userAccount).call()
-                .then((energy) => {
-                    if (energy >= 1000) {
-                        // Jika cukup energi, lakukan aksi untuk mendapatkan koin dan energi
-                        contract.methods.increaseBalance().send({ from: userAccount })
-                            .then(() => {
-                                // Perbarui saldo dan energi
-                                updateBalanceAndEnergy();
-                                // Efek visual: memutar ikon semangka
-                                document.getElementById("currency-icon").classList.add("spin");
-                                setTimeout(() => {
-                                    document.getElementById("currency-icon").classList.remove("spin");
-                                }, 3000);
-                            })
-                            .catch((error) => {
-                                console.error('Error saat mendapatkan koin:', error);
-                                alert('Terjadi kesalahan saat memperoleh koin.');
-                            });
-                    } else {
-                        alert('Energi Anda tidak cukup untuk mengumpulkan koin.');
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error saat memeriksa energi:', error);
-                });
+            let energy = document.getElementById("energy-level").style.width.replace('%', '');
+            if (parseInt(energy) > 0) {
+                // Logika untuk menambah saldo
+                contract.methods.earnCoins()
+                    .send({ from: userAccount })
+                    .then(() => {
+                        updateEnergy();
+                        getBalance();
+                    });
+            } else {
+                alert('Energi Anda habis! Silakan tunggu beberapa saat.');
+            }
         }
 
-        // Fungsi untuk menampilkan halaman yang dipilih
+        // Fungsi untuk berpindah antar halaman
         function showPage(pageId) {
-            let pages = document.querySelectorAll('.page-content');
-            pages.forEach((page) => {
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => {
                 page.style.display = 'none';
             });
-            document.getElementById(pageId).style.display = 'block';
+            const pageToShow = document.getElementById(pageId);
+            if (pageToShow) {
+                pageToShow.style.display = 'block';
+            }
         }
 
-        // Tampilkan halaman utama saat pertama kali dibuka
-        showPage('home');
+        // Inisialisasi Web3 dan smart contract
+        window.addEventListener('load', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                const web3 = new Web3(window.ethereum);
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userAccount = (await web3.eth.getAccounts())[0];
+                    showPage('home');
+                    getBalance();
+                    updateEnergy();
+                } catch (error) {
+                    alert('Akses ke wallet ditolak');
+                }
+            } else {
+                alert('Ethereum wallet tidak ditemukan.');
+            }
+        });
     </script>
 </body>
 </html>
