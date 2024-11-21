@@ -1,276 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semangka Click</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(145deg, #1f8f3f, #0a5d22);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-        }
-        .header {
-            width: 100%;
-            text-align: center;
-            padding: 20px;
-            font-size: 4.5em;
-            font-weight: 900;
-            background: linear-gradient(to right, #f44336, #4caf50);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
-        }
-        .balance-container, .page-content {
-            text-align: center;
-            display: none;
-            margin-top: 20px;
-        }
-        .balance {
-            font-size: 2.5em;
-        }
-        .currency-icon {
-            font-size: 14em;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: transform 3s ease-in-out;
-        }
-        .currency-icon.spin {
-            animation: spin 3s linear;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .energy-bar {
-            margin: 0 auto;
-            width: 50%;
-            height: 20px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .energy-level {
-            background-color: green;
-            height: 100%;
-            width: 100%;
-            transition: width 0.3s ease-in-out;
-        }
-        .menu {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            background: #000;
-            padding: 10px;
-            position: absolute;
-            bottom: 0;
-        }
-        .menu-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #bbb;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smileypaw Clicker</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header">Semangka Click</div>
+  <div id="app">
+    <!-- Login / Registration Section -->
+    <div id="auth-section">
+      <h1>Welcome to Smileypaw Clicker</h1>
+      <p>Click-to-earn Smileypaw tokens!</p>
 
-    <!-- Halaman Home -->
-    <div class="balance-container" id="home">
-        <div class="status-bar">Selamat datang di Semangka Click</div>
-        <p>Game pengumpulan koin berbasis blockchain, "Semangka". Mulai mengumpulkan koin sekarang!</p>
-    </div>
+      <div id="login-form">
+        <h2>Login</h2>
+        <input type="email" id="login-email" placeholder="Enter your email">
+        <input type="password" id="login-password" placeholder="Enter your password">
+        <button onclick="login()">Login</button>
+        <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
+      </div>
 
-    <!-- Halaman Game -->
-    <div class="page-content" id="gamePage">
-        <h2>Game Menu</h2>
-        <p>Klik ikon semangka untuk mulai mengumpulkan koin.</p>
-        <div>Saldo Anda:</div>
-        <div class="balance" id="balance">406,520</div>
-        <div class="energy-bar">
-            <div class="energy-level" id="energy-level" style="width: 100%;"></div>
-        </div>
-        <div id="energy-text">100000/100000</div>
-        <div class="currency-icon" id="currency-icon" onclick="earnCoins()">🍉</div>
-    </div>
+      <div id="wallet-section">
+  <button id="connect-wallet">Connect Wallet</button>
+  <p>Connected Account: <span id="connected-account">None</span></p>
+      </div>
 
-    <!-- Halaman Referral -->
-    <div class="page-content" id="matesPage">
-        <h2>Referral Menu</h2>
-        <p>Bagikan kode referral ini untuk mengundang teman:</p>
-        <p><a href="https://example.com">https://example.com</a></p>
-    </div>
-
-    <!-- Halaman Register -->
-    <div class="page-content" id="registerPage">
+      <div 
+id="register-form" style="display: none;">
         <h2>Register</h2>
-        <p>Masukkan informasi Anda untuk mendaftar:</p>
-        <input type="text" id="userName" placeholder="Nama Pengguna">
-        <input type="password" id="password" placeholder="Kata Sandi">
-        <input type="text" id="walletAddress" placeholder="Alamat Wallet">
-        <button onclick="registerUser()">Daftar</button>
+        <input type="email" id="register-email" placeholder="Enter your email">
+        <input type="password" id="register-password" placeholder="Create a password">
+        <button onclick="register()">Register</button>
+        <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+      </div>
     </div>
 
-    <!-- Halaman Staking -->
-    <div class="page-content" id="stakingPage">
-        <h2>Staking</h2>
-        <p>Stake token untuk mendapatkan imbalan tambahan.</p>
-        <input type="number" id="stakeAmount" placeholder="Jumlah Token">
-        <button onclick="stakeTokens()">Stake</button>
+    <!-- Gameplay Section -->
+    <div id="game-section" style="display: none;">
+      <h1>Smileypaw Clicker</h1>
+      <p>Earn Smileypaw tokens by clicking below!</p>
+      <button id="click-button" onclick="earnToken()">Click Me</button>
+      <p>Tokens Earned: <span id="tokens-earned">0</span></p>
+      <p>Daily Limit: <span id="daily-limit">50</span></p>
+      <button onclick="logout()">Logout</button>
     </div>
-
-    <!-- Halaman Upgrade Level -->
-    <div class="page-content" id="upgradePage">
-        <h2>Upgrade Level</h2>
-        <p>Tingkatkan level Anda dengan koin yang terkumpul.</p>
-        <button onclick="upgradeLevel()">Upgrade Level</button>
-    </div>
-
-    <div class="menu">
-        <div class="menu-item" onclick="showPage('home')">
-            <span>🏠</span>
-            <div>Home</div>
-        </div>
-        <div class="menu-item" onclick="showPage('gamePage')">
-            <span>🎮</span>
-            <div>Game</div>
-        </div>
-        <div class="menu-item" onclick="showPage('matesPage')">
-            <span>👤</span>
-            <div>Referral</div>
-        </div>
-        <div class="menu-item" onclick="showPage('registerPage')">
-            <span>📝</span>
-            <div>Register</div>
-        </div>
-        <div class="menu-item" onclick="showPage('stakingPage')">
-            <span>💰</span>
-            <div>Staking</div>
-        </div>
-        <div class="menu-item" onclick="showPage('upgradePage')">
-            <span>🚀</span>
-            <div>Upgrade Level</div>
-        </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.1/web3.min.js"></script>
-    <script>
-        // ABI dari smart contract
-        const abi = [{"iputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"DailyBonusClaimed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"ReferralReward","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"uid","type":"uint256"},{"indexed":false,"internalType":"string","name":"username","type":"string"}],"name":"Registration","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"RewardClaimed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"duration","type":"uint256"}],"name":"Staked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"Unstaked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawal","type":"event"},{"inputs":[{"internalType":"address","name":"owner_","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":unction"}];
-
-        const contractAddress = '0xb88b07C80B9e4e2b3c481623edE7978484aC8594'; // Ganti dengan alamat smart contract Anda
-        let web3 = new Web3(new Web3.providers.HttpProvider('https://polygon-mainnet.infura.io/v3/4b83836820944bf0bba486179ee4dbfd'));
-        let contract = new web3.eth.Contract(abi, contractAddress);
-        let userAccount = '0xCf3022713F099b3D9C90066B70aF7dBD1feF5Af2'; // Ganti dengan alamat wallet pengguna
-
-        // Fungsi untuk register user
-        function registerUser() {
-            let userName = document.getElementById("userName").value;
-            let password = document.getElementById("password").value;
-            let walletAddress = document.getElementById("walletAddress").value;
-
-            contract.methods.registerUser(userName, password, walletAddress).send({ from: userAccount })
-                .then((receipt) => {
-                    alert("Pendaftaran berhasil!");
-                    console.log(receipt);
-                })
-                .catch((error) => {
-                    alert("Terjadi kesalahan: " + error.message);
-                });
-        }
-
-        // Fungsi untuk menampilkan halaman yang sesuai
-        function showPage(pageId) {
-            const pages = ['home', 'gamePage', 'matesPage', 'registerPage', 'stakingPage', 'upgradePage'];
-            pages.forEach(page => {
-                document.getElementById(page).style.display = 'none';
-            });
-            document.getElementById(pageId).style.display = 'block';
-        }
-
-        // Fungsi untuk memulai game (klik semangka)
-        function earnCoins() {
-            // Dapatkan saldo dan energi terkini
-            contract.methods.balanceOf(userAccount).call()
-                .then((balance) => {
-                    document.getElementById("balance").innerText = balance;
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-
-            contract.methods.getEnergy(userAccount).call()
-                .then((energy) => {
-                    let maxEnergy = 100000; // Misalnya maksimal energi
-                    let remainingEnergy = maxEnergy - energy;
-                    let energyPercent = (remainingEnergy / maxEnergy) * 100;
-                    document.getElementById("energy-level").style.width = energyPercent + "%";
-                    document.getElementById("energy-text").innerText = remainingEnergy + "/" + maxEnergy;
-
-                    // Jika energi cukup, lakukan aksi klik
-                    if (remainingEnergy > 0) {
-                        contract.methods.decreaseEnergy().send({ from: userAccount })
-                            .then(() => {
-                                // Spin icon dan update koin
-                                document.getElementById("currency-icon").classList.add("spin");
-                                setTimeout(() => {
-                                    document.getElementById("currency-icon").classList.remove("spin");
-                                }, 3000);
-                                contract.methods.increaseBalance().send({ from: userAccount })
-                                    .then(() => {
-                                        alert("Koin berhasil ditambahkan!");
-                                    })
-                                    .catch((error) => {
-                                        console.error(error);
-                                    });
-                            })
-                            .catch((error) => {
-                                console.error(error);
-                            });
-                    } else {
-                        alert("Energi Anda habis! Silakan tunggu.");
-                    }
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-        }
-
-        // Fungsi staking
-        function stakeTokens() {
-            let stakeAmount = document.getElementById("stakeAmount").value;
-
-            contract.methods.stakeTokens(stakeAmount).send({ from: userAccount })
-                .then((receipt) => {
-                    alert("Staking berhasil!");
-                    console.log(receipt);
-                })
-                .catch((error) => {
-                    alert("Terjadi kesalahan: " + error.message);
-                });
-        }
-
-        // Fungsi untuk upgrade level
-        function upgradeLevel() {
-            contract.methods.upgradeLevel().send({ from: userAccount })
-                .then((receipt) => {
-                    alert("Level berhasil ditingkatkan!");
-                    console.log(receipt);
-                })
-                .catch((error) => {
-                    alert("Terjadi kesalahan: " + error.message);
-                });
-        }
-
-        // Menampilkan halaman utama setelah memuat
-        window.onload = () => showPage('home');
-    </script>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
