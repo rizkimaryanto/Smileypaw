@@ -1,48 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smileypaw Token DApp</title>
-  <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js"></script>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airdrop Nitrous</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Jika Anda memiliki file CSS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.1/web3.min.js"></script> <!-- Library Web3 -->
+    <script type="module" src="script.js"></script> <!-- Menghubungkan file JavaScript -->
 </head>
 <body>
-  <div id="auth-section">
-    <h1>Welcome to Smileypaw Token</h1>
-    <div id="login-form" style="display: none;">
-      <h2>Login</h2>
-      <input type="email" id="login-email" placeholder="Email" required>
-      <input type="password" id="login-password" placeholder="Password" required>
-      <button onclick="login()">Login</button>
-      <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
-    </div>
+    <header>
+        <h1>Airdrop Nitrous</h1>
+    </header>
+    
+    <main>
+        <section id="auth-section">
+            <h2>Autentikasi</h2>
+            <button onclick="showLogin()">Login</button>
+            <button onclick="showRegister()">Register</button>
 
-    <div id="register-form">
-      <h2>Register</h2>
-      <input type="email" id="register-email" placeholder="Email" required>
-      <input type="password" id="register-password" placeholder="Password" required>
-      <button onclick="register()">Register</button>
-      <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
-    </div>
-  </div>
+            <div id="login-form" style="display:none;">
+                <h3>Login</h3>
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button onclick="login()">Login</button>
+            </div>
 
-  <div id="game-section" style="display: none;">
-    <h1>Smileypaw Game</h1>
-    <p>Connected Wallet: <span id="connected-account">Not connected</span></p>
-    <button id="connect-wallet">Connect Wallet</button>
-    <button onclick="logout()">Logout</button>
+            <div id="register-form" style="display:none;">
+                <h3>Register</h3>
+                <input type="email" id="register-email" placeholder="Email" required>
+                <input type="password" id="register-password" placeholder="Password" required>
+                <button onclick="register()">Register</button>
+            </div>
+        </section>
 
-    <div id="game-actions">
-      <h2>Earn Tokens</h2>
-      <p>Tokens Earned Today: <span id="tokens-earned">0</span></p>
-      <button onclick="earnToken()">Click to Earn 1 Token</button>
-    </div>
-  </div>
+        <section id="game-section" style="display:none;">
+            <h2>Game Section</h2>
+            <button id="connect-wallet">Connect Wallet</button>
+            <p>Connected Account: <span id="connected-account"></span></p>
+            <button onclick="earnToken()">Earn Token</button>
+            <p>Tokens Earned: <span id="tokens-earned">0</span></p>
+            <button onclick="logout()">Logout</button>
+        </section>
+    </main>
 
-  <script src="script.js"></script>
+    <footer>
+        <p>&copy; 2023 Airdrop Nitrous. Semua hak dilindungi.</p>
+    </footer>
 </body>
 </html>
