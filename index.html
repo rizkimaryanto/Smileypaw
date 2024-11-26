@@ -1,56 +1,31 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airdrop Nitrous</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Jika Anda memiliki file CSS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.1/web3.min.js"></script> <!-- Library Web3 -->
-    <script type="module" src="script.js"></script> <!-- Menghubungkan file JavaScript -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smileypaw Tap Game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="container">
     <header>
-        <h1>Airdrop Nitrous</h1>
+      <h1>Smileypaw Tap Game</h1>
+      <p>Tap the paw as fast as you can to earn Smileypaw tokens!</p>
     </header>
-    
     <main>
-        <section id="auth-section">
-            <h2>Autentikasi</h2>
-            <button onclick="showLogin()">Login</button>
-            <button onclick="showRegister()">Register</button>
-
-            <div id="login-form" style="display:none;">
-                <h3>Login</h3>
-                <input type="email" id="login-email" placeholder="Email" required>
-                <input type="password" id="login-password" placeholder="Password" required>
-                <button onclick="login()">Login</button>
-            </div>
-
-            <div id="register-form" style="display:none;">
-                <h3>Register</h3>
-                <input type="email" id="register-email" placeholder="Email" required>
-                <input type="password" id="register-password" placeholder="Password" required>
-                <button onclick="register()">Register</button>
-            </div>
-        </section>
-
-        <section id="game-section" style="display:none;">
-            <h2>Game Section</h2>
-            <button id="connect-wallet">Connect Wallet</button>
-            <p>Connected Account: <span id="connected-account"></span></p>
-            <button onclick="earnToken()">Earn Token</button>
-            <p>Tokens Earned: <span id="tokens-earned">0</span></p>
-            <button onclick="logout()">Logout</button>
-        </section>
+      <div class="tap-area">
+        <img id="paw" src="https://via.placeholder.com/150" alt="Tap the Paw!">
+        <p id="tap-count">Taps: 0</p>
+      </div>
+      <div class="actions">
+        <button id="claim-reward">Claim Reward</button>
+        <p id="reward-status"></p>
+      </div>
     </main>
-
     <footer>
-        <p>&copy; 2023 Airdrop Nitrous. Semua hak dilindungi.</p>
+      <p>Powered by Smileypaw Token</p>
     </footer>
-
-    <script>
-        // Pastikan untuk menambahkan kode JavaScript Anda di sini jika tidak menggunakan file terpisah
-        // Misalnya, Anda bisa menyalin isi dari script.js di sini jika perlu
-    </script>
+  </div>
+  <script src="app.js"></script>
 </body>
 </html>
