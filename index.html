@@ -1,31 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smileypaw Tap Game</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smileypaw</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(145deg, #1f8f3f, #0a5d22);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+        .header {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            font-size: 4.5em;
+            font-weight: 900;
+            background: linear-gradient(to right, #f44336, #4caf50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+        }
+        .balance-container, .page-content, .container {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        .balance {
+            font-size: 2.5em;
+        }
+        .currency-icon {
+            font-size: 14em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 10s ease-in-out;
+        }
+        .currency-icon.spin {
+            animation: spin 10s linear;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .energy-bar {
+            margin: 0 auto;
+            width: 50%;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .energy-level {
+            background-color: green;
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease-in-out;
+        }
+        .menu {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            background: #000;
+            padding: 10px;
+            position: absolute;
+            bottom: 0;
+        }
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #bbb;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Smileypaw Tap Game</h1>
-      <p>Tap the paw as fast as you can to earn Smileypaw tokens!</p>
-    </header>
-    <main>
-      <div class="tap-area">
-        <img id="paw" src="https://via.placeholder.com/150" alt="Tap the Paw!">
-        <p id="tap-count">Taps: 0</p>
-      </div>
-      <div class="actions">
-        <button id="claim-reward">Claim Reward</button>
-        <p id="reward-status"></p>
-      </div>
-    </main>
-    <footer>
-      <p>Powered by Smileypaw Token</p>
-    </footer>
-  </div>
-  <script src="app.js"></script>
+    <div class="header">Smileypaw</div>
+
+    <!-- Halaman Home -->
+    <div class="balance-container" id="home">
+        <div class="status-bar">Selamat datang di Smileypaw</div>
+        <p>
+            Game pengumpulan koin berbasis blockchain:<br>
+            <strong>Nama:</strong> Smileypaw<br>
+            <strong>Symbol:</strong> SPAW<br>
+            <strong>Total Suplai:</strong> 100.000.000.000<br>
+            <strong>Jaringan:</strong> Polygon<br>
+            Mulai mengumpulkan koin sekarang!
+        </p>
+    </div>
+
+    <!-- Halaman Game -->
+    <div class="page-content" id="gamePage">
+        <h2>Game Menu</h2>
+        <p>Klik ikon Smileypaw untuk mulai mengumpulkan koin.</p>
+        <div>Saldo Anda:</div>
+        <div class="balance" id="balance">100</div>
+        <div class="energy-bar">
+            <div class="energy-level" id="energy-level" style="width: 100%;"></div>
+        </div>
+        <div id="energy-text">10000/10000</div>
+        <div class="currency-icon" id="currency-icon" onclick="earnCoins()">☢️</div>
+    </div>
+
+    <!-- Halaman Referral -->
+    <div id="referralPage" class="page-content">
+        <h2>Referral Menu</h2>
+        <p>Bagikan kode referral Anda:</p>
+        <input type="text" id="referralCode" readonly>
+        <button onclick="generateReferralCode()">Generate Referral Code</button>
+        <p>Gunakan tautan ini untuk membagikan referral:</p>
+        <p id="referralLink"></p>
+    </div>
+
+    <!-- Halaman Tasks -->
+    <div class="page-content" id="tasksPage">
+        <h2>Tasks Menu</h2>
+        <button onclick="showTasks()">Mulai Jawaban</button>
+    </div>
+
+    <!-- Halaman Boost -->
+    <div class="page-content" id="boostPage">
+        <h2>Boost Menu</h2>
+        <button onclick="showBoostOptions()">Pilih Level Boost</button>
+    </div>
+
+    <!-- Halaman Staking -->
+    <div class="page-content" id="stakingPage">
+        <h2>Staking Menu</h2>
+        <p>Stake token Anda untuk mendapatkan reward tambahan.</p>
+        <input type="number" id="stakeAmount" placeholder="Jumlah Token untuk di-Stake" />
+        <button onclick="stakeTokens()">Stake Sekarang</button>
+    </div>
+
+    <!-- Halaman Withdraw -->
+    <div class="container" id="withdraw">
+        <h2>Withdraw</h2>
+        <input type="number" id="withdrawAmount" placeholder="Jumlah Token untuk Withdraw">
+        <button onclick="withdrawTokens()">Withdraw Sekarang</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
